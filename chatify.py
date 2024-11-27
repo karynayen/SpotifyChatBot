@@ -284,20 +284,20 @@ print(result)
                 system_recc_resp += '\n' + track['name'] + ' uri: ' + track['uri']
                 user_recc_resp += '\n' + track['name'] + ' by ' + track['artists'][0]['name']
             self.conversation.append({"role": "system", "content": system_recc_resp})
-            message += user_recc_resp
+            message += user_recc_resp + '\n'
         if "add_to_seed_artists" in code_text:
             new_artist = self.seed_artists[-1]
-            message += f"Added {self.get_artist(new_artist)['name']} to seed artists."
+            message += f"Added {self.get_artist(new_artist)['name']} to seed artists.\n"
         if "add_to_seed_tracks" in code_text:
             new_track = self.seed_tracks[-1]
-            message += f"Added {self.get_track(new_track)['name']} to seed tracks."
+            message += f"Added {self.get_track(new_track)['name']} to seed tracks.\n"
         if "add_to_seed_genres" in code_text:
             new_genre = self.seed_genres[-1]
-            message += f"Added {new_genre} to seed genres."
+            message += f"Added {new_genre} to seed genres.\n"
         if "modify_mood" in code_text:
-            message += f"Modified mood to valence: {self.target_valence}, energy: {self.target_energy}, danceability: {self.target_danceability}."
+            message += f"Modified mood to valence: {self.target_valence}, energy: {self.target_energy}, danceability: {self.target_danceability}.\n"
         if "add_tracks_to_playlist" in code_text:
-            message += "Added tracks to playlist." # some how also add a spotify iframe... 
+            message += "Added tracks to playlist.\n" # some how also add a spotify iframe... 
         return message
     
     def __init__(self, client: OpenAI, spotify: SpotifyOAuth):
