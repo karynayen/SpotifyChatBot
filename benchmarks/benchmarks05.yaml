@@ -1,0 +1,8 @@
+# recommending a song immediately and then adding the song to the playlist
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Can you add all the songs to the playlist"
+  expected_type: add-to-playlist # we don't know what songs are being added here
+  expected_size: 10
+- prompt: "Thank you!"
+  expected_type: text

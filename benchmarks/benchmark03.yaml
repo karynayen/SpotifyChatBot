@@ -1,0 +1,10 @@
+# combining statements
+- prompt: "I love the song kyoto by phoebe bridgers"
+  expected_type: add-tracks
+  expected_result: ["Kyoto"]
+  expected_type: add-artist
+  expected_result: ["Phoebe Bridgers"]
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

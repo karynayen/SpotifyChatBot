@@ -1,0 +1,7 @@
+- prompt: "I love the song don't stop me now"
+  expected_type: add-tracks
+  expected_result: ["Don't Stop Me Now - Remastered 2011"]
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

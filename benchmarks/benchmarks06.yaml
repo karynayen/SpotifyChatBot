@@ -1,0 +1,8 @@
+
+# Test immediately addding a song to the playlist
+# Providing the full song name so that we can guarantee the expected result. 
+- prompt: "Add the song Semi-Charmed Life to the playlist please."
+  expected_type: add-to-playlist
+  expected_result: ["Semi-Charmed Life"]
+- prompt: "Thank you!"
+  expected_type: text

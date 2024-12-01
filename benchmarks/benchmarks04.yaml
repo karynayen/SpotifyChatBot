@@ -1,0 +1,7 @@
+# Simple dealing with mood. We can't control what the mood will be, we just want to ensure the the mood is altered. 
+- prompt: "I'm feeling so sad today"
+  expected_type: modify-mood
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

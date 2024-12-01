@@ -1,5 +1,5 @@
 # Most basic test
-- prompt: I like the artist Taylor Swift
+- prompt: "I like the artist Taylor Swift"
   expected_type: add-artist
   expected_result: ['Taylor Swift']
 - prompt: Get me some recommendations.
