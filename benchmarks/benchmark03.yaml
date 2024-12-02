@@ -1,9 +1,10 @@
-# combining statements
+# combining statements, checking for multistep functionality
 - prompt: "I love the song kyoto by phoebe bridgers"
-  expected_type: add-tracks
-  expected_result: ["Kyoto"]
-  expected_type: add-artist
-  expected_result: ["Phoebe Bridgers"]
+  expected_responses: 
+    - expected_type: add-artist
+      expected_result: ["Phoebe Bridgers"]
+    - expected_type: add-tracks
+      expected_result: ["Kyoto"]
 - prompt: "Get me some recommendations."
   expected_type: get-recommendations
 - prompt: "Thank you!"

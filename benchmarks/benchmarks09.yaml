@@ -1,9 +1,14 @@
 # testing the entire flow, using all of the function stubs
+# a more natural conversation inteject random conversatoins
 
+- prompt: "hey! nice to meet you"
+  expected_type: text
 - prompt: "I like the Backstreet Boys."
   expected_type: add-artist
   expected_result: ["Backstreet Boys"]
-- prompt: "I also like the artist *NSYNC."
+- prompt: "wow thanks thats so nice of you"
+  expected_type: text
+- prompt: "oh wait to talk more about songs, i also like the artist *NSYNC."
   expected_type: add-artist
   expected_result: ["Backstreet Boys", "*NSYNC"]
 - prompt: "I love the song 'I Want It That Way'" 
@@ -12,6 +17,8 @@
 - prompt: "I want to listen to punk music."
   expected_type: add-genres
   expected_result: ["punk"]
+- prompt: 'once i saw this EPIC punk concert'
+  expected_type: text
 - prompt: "Get me some recommendations."
   expected_type: get-recommendations
 - prompt: "Can you add all of those songs to the playlist"
@@ -21,10 +28,3 @@
   expected_result: ["Crazy Train"]
 - prompt: "Thank you!"
   expected_type: text
-
-
-# a more natural conversation inteject random conversatoins
-
-# test genres
-# add tests that will fails
-# sometimes get add to seed_traacks and add to playlist confused
