@@ -1,0 +1,11 @@
+# TODO ADD MORE FAILING BENCHMARKS
+# IMMEDIATELY CHECK GENRES
+# we can't really handle multi step
+# when asking song related functions
+# Tesing Failure: 
+# Talking about things that are very unrelated
+# todo test more multi step in a single prompt
+# add tests that will fails
+# sometimes get add to seed_traacks and add to playlist confused
+# doesn't really work if they start talking about something un realate
+# for exampel  'omg for lunch i had the best sandwich'

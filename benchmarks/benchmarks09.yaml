@@ -17,7 +17,7 @@
 - prompt: "I want to listen to punk music."
   expected_type: add-genres
   expected_result: ["punk"]
-- prompt: 'once i saw this EPIC punk concert'
+- prompt: 'i actually went to a punk concert last week'
   expected_type: text
 - prompt: "Get me some recommendations."
   expected_type: get-recommendations
