@@ -1,11 +1,11 @@
-# TODO ADD MORE FAILING BENCHMARKS
-# IMMEDIATELY CHECK GENRES
-# we can't really handle multi step
-# when asking song related functions
-# Tesing Failure: 
-# Talking about things that are very unrelated
-# todo test more multi step in a single prompt
-# add tests that will fails
-# sometimes get add to seed_traacks and add to playlist confused
-# doesn't really work if they start talking about something un realate
-# for exampel  'omg for lunch i had the best sandwich'
+# FAILS: 
+# This is a strange case because the model is not technically wrong.
+# However, it is making an assumption that the user likes the Artist Queen.
+# It seems like user wording is very important in this case.
+- prompt: "I really like the song don't stop me now"
+  expected_type: add-tracks
+  expected_result: ["Don't Stop Me Now - Remastered 2011"]
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

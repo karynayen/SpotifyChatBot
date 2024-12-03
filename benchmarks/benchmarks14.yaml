@@ -1,0 +1,9 @@
+- prompt: "My mood is very angry. add the song Teenagers to the track seeds. Add I write sins not tragedies to the playlist. I want some recommendations too"
+  expected_responses: 
+    - expected_type: get-recommendations
+    - expected_type: add-track
+      expected_value: ["Teenagers"]
+    - expected_type: modify-mood
+    - expected_type: add-to-playlist
+- prompt: "Thank you!"
+  expected_type: text

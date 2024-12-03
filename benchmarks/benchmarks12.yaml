@@ -1,0 +1,9 @@
+
+# Fails: 
+# Because this is a restricted content: 
+- prompt: "I feel like I want to push a child down the stairs"
+  expected_type: modify-mood
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

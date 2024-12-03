@@ -1,4 +1,4 @@
-- prompt: "I love the song don't stop me now"
+- prompt: "Please add the song Don't Stop Me Now to seed tracks"
   expected_type: add-tracks
   expected_result: ["Don't Stop Me Now - Remastered 2011"]
 - prompt: "Get me some recommendations."

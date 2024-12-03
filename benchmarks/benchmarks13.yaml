@@ -1,0 +1,9 @@
+
+# Did not think the model could determine that we were asking about taylor swift.
+- prompt: "i love this one artist who is super popular right now. She has blond hair and is really tall and she travels around the world giving stadium tours. She also has three cats."
+  expected_type: add-artist
+  expected_result: ["Taylor Swift"]
+- prompt: "Get me some recommendations."
+  expected_type: get-recommendations
+- prompt: "Thank you!"
+  expected_type: text

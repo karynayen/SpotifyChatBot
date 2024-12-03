@@ -116,16 +116,21 @@ def add_to_seed_tracks(track_name):
     ...
 def add_to_seed_genres(genre_name):
     ...
-def add_tracks_to_playlist(track_titles_or_uris):
-    ...
 # valence, energy, danceability are floats between 0 and 1
 def modify_mood(valence: float, energy: float, danceability: float):
     ...
-Return the result in a variable called result.
-Users might thank you or chat with topics unrelated to the functions.
+def get_recommendations():
+    ...
+# This function works best with a list of Track URIs
+def add_tracks_to_playlist(additional_track_titles_or_uris):
+    ...
+Return the response in a variable called result.
+Users might thank you or chat with topics unrelated to the functions respond accordingly.
 You might need to use multiple function stubs. For example if the user mentions a track and by an artist. 
-Do not redefine the function stubs just use this existing method.
-Don't correct their questions.
+DO NOT get_recommendations unless the user asks for a recommendation.
+DO NOT add a track if it has already been added.
+DO NOT redefine the function stubs just use this existing method.
+DO NOT correct a user's questions.
 """
     few_shot_prompt = "I like the artist bobbin."
     few_shot_response = """
@@ -145,18 +150,19 @@ print(result)
 Here are some recommendations for you:
 Love Story uri: spotify:track:1CkvWZme3pRgbzaxZnTl5X
 Blank Space uri: spotify:track:1p80LdxRV74UKvL8gnD7ky
+Shake It Off uri: spotify:track:0a1gHP0HAqALbEyxaD5Ngn
 """
-    few_shot_prompt3 = "Add the second song to the playlist."
+    few_shot_prompt3 = "Add the last two songs to the playlist."
     few_shot_response3 = """
 ```python
-result = add_tracks_to_playlist("spotify:track:1p80LdxRV74UKvL8gnD7ky")
+result = add_tracks_to_playlist(["spotify:track:1p80LdxRV74UKvL8gnD7ky","spotify:track:0a1gHP0HAqALbEyxaD5Ngn"])
 print(result)
 ```
 """
-    few_shot_prompt4 = "Add the song True Blue to the playlist."
+    few_shot_prompt4 = "Add the song Hello to the playlist."
     few_shot_response4 = """
 ```python
-result = add_tracks_to_playlist("True Blue")
+result = add_tracks_to_playlist(["Hello"])
 print(result)
 ```
 """
@@ -224,37 +230,27 @@ print(result)
         return track_titles_or_uris
 
     # SUBSTITUTE RECCOMENDATIONS ALGORITHM FOR SPOTIFY API... WE COULD IMPROVE THIS LATER
-    def recommend_songs(self, seed_artists=None, seed_tracks=None, seed_genres=None, valence=None, energy=None, danceability=None, limit=5):
+    def recommend_songs(self, seed_artists=None, seed_tracks=None, seed_genres=None, valence=None, energy=None, danceability=None, limit=5, random_seed=None):
         recommendations = self.spotify_tracks_df
-        
-        if seed_artists:
-            artist_recommendations = recommendations[recommendations['artists'].isin(seed_artists)]
-        else:
-            artist_recommendations = pd.DataFrame()
+        recommendations = recommendations.drop_duplicates(subset=['track_name', 'artists'], keep=False)
+        filtered_recommendations = []
 
-        
-        if seed_tracks:
-            track_recommendations = recommendations[recommendations['track_id'].isin(seed_tracks)]
-        else:
-            track_recommendations = pd.DataFrame()
-
+        # Apply filters independently and gather results
         if seed_genres:
-            genre_recommendations = recommendations[recommendations['track_genre'].isin(seed_genres)]
-        else:
-            genre_recommendations = pd.DataFrame()
+            filtered_recommendations.append(recommendations[recommendations['track_genre'].isin(seed_genres)])
+
+        if seed_artists:
+            #filtered_recommendations.append(recommendations[recommendations['artists'].isin(seed_artists)])
+            filtered_recommendations.append(recommendations[recommendations['artists'].apply(lambda x: x is not None and any(artist in x for artist in seed_artists))])
+    
+        if seed_tracks:
+            filtered_recommendations.append(recommendations[recommendations['track_id'].isin(seed_tracks)])
         
-
-        # Use artist_recommendations if available, else track_recommendations, else the full dataset
-
-        if not artist_recommendations.empty:
-            recommendations = artist_recommendations
-        elif not track_recommendations.empty:
-            recommendations = track_recommendations
-        elif not genre_recommendations.empty:
-            recommendations = genre_recommendations
-        else:
-            recommendations = self.spotify_tracks_df
-
+        # Combine all filtered results
+        if filtered_recommendations:
+            recommendations = pd.concat(filtered_recommendations).drop_duplicates()
+        
+        # Apply mood filters
         if valence is not None:
             recommendations = recommendations[recommendations['valence'] >= valence]
         
@@ -264,13 +260,20 @@ print(result)
         if danceability is not None:
             recommendations = recommendations[recommendations['danceability'] >= danceability]
 
+        # If recommendations are empty, fall back to the entire dataset
         if recommendations.empty:
             recommendations = self.spotify_tracks_df
+
+        # Shuffle the results
+        recommendations = recommendations.sample(n=min(limit, len(recommendations)), random_state=random_seed)
+
+        # Prepare the result
         result = []
         for index, track in recommendations.head(limit).iterrows():
             artists = track['artists'].split(';')
             track_info = {'name': track['track_name'], 'artists': artists, 'uri': "spotify:track:" + track['track_id']}
             result.append(track_info)
+
         return result
 
     # Get recommendations based on seeds
@@ -354,8 +357,8 @@ print(result)
     
     def say(self, user_message: str) -> AgentResponse:
         if len(self.conversation) > 20:
-            self.conversation.pop(1)
-            self.conversation.pop(2)
+            self.conversation.pop(10)
+            self.conversation.pop(10)
         # Add the user message to the conversation.
         self.conversation.append({"role": "user", "content": user_message})
         
@@ -367,56 +370,57 @@ print(result)
         
         resp_text = resp.choices[0].message.content
 
-        print('RESP TEXT', resp_text)
+        # print('RES', resp_text)
+
         self.conversation.append({"role": "system", "content": resp_text })
         code_text = self.extract_code(resp_text)
         # TODO if prompt was relating to add seed artists, delete from conversation
         # store conversation to display
         try:
             res = self.run_code(code_text)
-        except: 
-            print('ERROR')
-            return TextResponse(text='An Error occured:' + resp_text)
         
-        # TODO perhaps a list of responses
-        responses = []
-        if "get_recommendations" in code_text:
-            system_recc_resp = "Here are some recommendations for you:"
-            user_recc_resp = "Here are some recommendations for you:"
-            for track in res:
-                system_recc_resp += '\n' + track['name'] + ' uri: ' + track['uri']
-                # user_recc_resp += '\n' + track['name'] + ' by ' + track['artists'][0]['name']
-                user_recc_resp += '\n' + track['name'] + ' by ' + "' ".join(track['artists'])
-            self.conversation.append({"role": "system", "content": system_recc_resp})
-            responses.append(GetRecommendationsResponse(text=user_recc_resp, recommendations=res))
-        if "add_to_seed_artists" in code_text:
-            new_artist = self.seed_artists[-1]
-            # message += f"Added {self.get_artist(new_artist)['name']} to seed artists.\n"
-            message = f"Added {new_artist} to seed artists."
-            responses.append(AddArtistResponse(text=message, artist_seeds=self.seed_artists))
-        if "add_to_seed_tracks" in code_text:
-            # message = f"Added {self.get_track(new_track)['name']} to seed tracks."
-            new_track = self.seed_tracks[-1]
-            message = f"Added {new_track} to seed tracks."
-            responses.append(AddTracksResponse(text=message, track_seeds=self.seed_tracks))
-        if "add_to_seed_genres" in code_text:
-            new_genre = self.seed_genres[-1]
-            message = f"Added {new_genre} to seed genres."
-            responses.append(AddGenresResponse(text=message, genre_seeds=self.seed_genres))
-        if "modify_mood" in code_text:
-            message = f"Modified mood to valence: {self.target_valence}, energy: {self.target_energy}, danceability: {self.target_danceability}."
-            responses.append(ModifyMoodResponse(text=message, valence=self.target_valence, energy=self.target_energy, danceability=self.target_danceability))
-        if "add_tracks_to_playlist" in code_text:
-            message = "Added tracks to playlist.\n" # some how also add a spotify iframe... 
-            responses.append(AddToPlaylistResponse(text=message, tracks=res))
-        if "get_recommendations" not in code_text \
-            and "add_to_seed_artists" not in code_text \
-                and "add_to_seed_tracks" not in code_text \
-                    and "add_to_seed_genres" not in code_text \
-                        and "modify_mood" not in code_text \
-                            and "add_tracks_to_playlist" not in code_text:
-            responses.append(TextResponse(text=res))
-        return responses
+        
+            # TODO perhaps a list of responses
+            responses = []
+            if "get_recommendations" in code_text:
+                system_recc_resp = "Here are some recommendations for you:"
+                user_recc_resp = "Here are some recommendations for you:"
+                for track in res:
+                    system_recc_resp += track['name'] + ' uri: ' + track['uri'] + '\n'
+                    # user_recc_resp += '\n' + track['name'] + ' by ' + track['artists'][0]['name']
+                    user_recc_resp += '\n' + track['name'] + ' by ' + "' ".join(track['artists'])
+                self.conversation.append({"role": "system", "content": system_recc_resp})
+                responses.append(GetRecommendationsResponse(text=user_recc_resp, recommendations=res))
+            if "add_to_seed_artists" in code_text:
+                new_artist = self.seed_artists[-1]
+                # message += f"Added {self.get_artist(new_artist)['name']} to seed artists.\n"
+                message = f"Added {new_artist} to seed artists."
+                responses.append(AddArtistResponse(text=message, artist_seeds=self.seed_artists))
+            if "add_to_seed_tracks" in code_text:
+                # message = f"Added {self.get_track(new_track)['name']} to seed tracks."
+                new_track = self.seed_tracks[-1]
+                message = f"Added {new_track} to seed tracks."
+                responses.append(AddTracksResponse(text=message, track_seeds=self.seed_tracks))
+            if "add_to_seed_genres" in code_text:
+                message = f"Your seed genres are now: {self.seed_genres}"
+                responses.append(AddGenresResponse(text=message, genre_seeds=self.seed_genres))
+            if "modify_mood" in code_text:
+                message = f"Modified mood to valence: {self.target_valence}, energy: {self.target_energy}, danceability: {self.target_danceability}."
+                responses.append(ModifyMoodResponse(text=message, valence=self.target_valence, energy=self.target_energy, danceability=self.target_danceability))
+            if "add_tracks_to_playlist" in code_text:
+                message = "Added tracks to playlist.\n" # some how also add a spotify iframe... 
+                responses.append(AddToPlaylistResponse(text=message, tracks=res))
+            if "get_recommendations" not in code_text \
+                and "add_to_seed_artists" not in code_text \
+                    and "add_to_seed_tracks" not in code_text \
+                        and "add_to_seed_genres" not in code_text \
+                            and "modify_mood" not in code_text \
+                                and "add_tracks_to_playlist" not in code_text:
+                responses.append(TextResponse(text=res))
+            return responses
+        except: 
+            print('ERROR PROCESSING CODE')
+            return [TextResponse(text=resp_text)]
     
     def __init__(self, client: OpenAI, spotify: SpotifyOAuth):
         self.client = client
@@ -431,7 +435,9 @@ print(result)
                              { "role": "system", "content": self.few_shot_response2 },
                              { "role": "system", "content": self.few_shot_response_another},
                              { "role": "user", "content": self.few_shot_prompt3 },
-                             { "role": "system", "content": self.few_shot_response3}]
+                             { "role": "system", "content": self.few_shot_response3},
+                             { "role": "user", "content": self.few_shot_prompt4 },
+                             { "role": "system", "content": self.few_shot_response4}]
         # TODO? add back fewshot response 4?
         self.seed_artists = []
         self.seed_tracks = []

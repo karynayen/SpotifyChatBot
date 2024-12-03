@@ -23,7 +23,7 @@
   expected_type: get-recommendations
 - prompt: "Can you add all of those songs to the playlist"
   expected_type: add-to-playlist 
-- prompt: "Oh also please add the song Crazy Train to the playlist."
+- prompt: "Add the song Crazy Train to the playlist."
   expected_type: add-to-playlist
   expected_result: ["Crazy Train"]
 - prompt: "Thank you!"
