@@ -366,7 +366,7 @@ print(result)
         resp = self.client.chat.completions.create(
             messages = self.conversation,
             model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
-            temperature=0)
+            temperature=0.2)
         
         resp_text = resp.choices[0].message.content
 
@@ -456,12 +456,10 @@ spotify_agent = SpotifyAgent(client=client, spotify=spotify)
 
 def spotify_chat(user_message, history):
     bot_response = spotify_agent.say(user_message)
+    all_responses = ""
     for response in bot_response:
-        print('LOOK AT TYPE', response)
-        history.append((user_message, response.text))
-    # print('BOT RESPONSE', bot_response)
-    #bot_response = spotify_agent.conversation[-1]['content']  # Last bot message
-    # history.append((user_message, bot_response))
+        all_responses += response.text + "\n"
+    history.append((user_message, all_responses))
     return history
 
 # Gradio Interface
