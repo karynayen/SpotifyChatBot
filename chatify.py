@@ -307,22 +307,27 @@ print(result)
         items = results['artists']['items']
         if items:
             artist = items[0]
-            # self.seed_artists.append(artist['uri']) # add first artist
-            self.seed_artists.append(artist['name']) # reccomendations can only do name now
+            # due to reccomendations endpoint deprecation, we need to store 'name' instead of 'uri'
+            self.seed_artists.append(artist['name']) 
+        else:
+            print(f"Artist {artist_name} not found.")
         
-         # TODO Figure out error handling
 
     def add_to_seed_tracks(self, track_name):
         results = spotify.search(q='track:' + track_name, type='track')
         items = results['tracks']['items']
         if items:
             track = items[0]
-            # self.seed_tracks.append(track['uri'])
+            # due to reccomendations endpoint deprecation, we need to store 'name' instead of 'uri'
             self.seed_tracks.append(track['name'])
+        else:
+            print(f"Track {track_name} not found.")
     
     def add_to_seed_genres(self, genre_name):
         if genre_name.lower() in self.possible_genres:
             self.seed_genres.append(genre_name.lower())
+        else: 
+            print(f"Genre {genre_name} not found in possible genres.")
 
     def modify_mood(self, valence: float, energy: float, danceability: float):
         self.target_valence = valence
@@ -366,21 +371,14 @@ print(result)
         resp = self.client.chat.completions.create(
             messages = self.conversation,
             model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
-            temperature=0.2)
+            temperature=0)
         
         resp_text = resp.choices[0].message.content
-
-        # print('RES', resp_text)
-
         self.conversation.append({"role": "system", "content": resp_text })
         code_text = self.extract_code(resp_text)
-        # TODO if prompt was relating to add seed artists, delete from conversation
-        # store conversation to display
         try:
             res = self.run_code(code_text)
         
-        
-            # TODO perhaps a list of responses
             responses = []
             if "get_recommendations" in code_text:
                 system_recc_resp = "Here are some recommendations for you:"
@@ -438,7 +436,6 @@ print(result)
                              { "role": "system", "content": self.few_shot_response3},
                              { "role": "user", "content": self.few_shot_prompt4 },
                              { "role": "system", "content": self.few_shot_response4}]
-        # TODO? add back fewshot response 4?
         self.seed_artists = []
         self.seed_tracks = []
         self.seed_genres = []
